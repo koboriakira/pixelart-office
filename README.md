@@ -33,6 +33,16 @@ bash examples/install-hooks.sh
 
 これにより `~/.claude/settings.json` に Hook が追加される。サーバーが停止中でも Claude Code の動作に影響しない。
 
+### アンインストール
+
+Hook 設定を削除し、ヘルパースクリプトを除去する:
+
+```bash
+bash examples/uninstall-hooks.sh
+```
+
+他の Hook 設定（Notification 等）には影響しない。
+
 ### エージェントID 規則
 
 `claude-{リポジトリ名}-{エージェント名}` の形式で自動生成される。
