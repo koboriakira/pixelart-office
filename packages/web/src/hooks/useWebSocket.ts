@@ -15,8 +15,8 @@ export function useWebSocket(
   onMessageRef.current = onMessage;
 
   const retryCountRef = useRef(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
-  const wsRef = useRef<WebSocket>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const wsRef = useRef<WebSocket>(undefined);
   const unmountedRef = useRef(false);
 
   const connect = useCallback(() => {

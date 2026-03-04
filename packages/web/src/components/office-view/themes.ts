@@ -33,8 +33,8 @@ export const DEPARTMENT_THEMES: Record<string, DepartmentThemeSet> = {
   },
 };
 
-export const PROVIDER_COLORS = {
+export const PROVIDER_COLORS: Record<string, number> = {
   claude: 0xd97706,
   copilot: 0x16a34a,
   other: 0x6b7280,
-} as const;
+};

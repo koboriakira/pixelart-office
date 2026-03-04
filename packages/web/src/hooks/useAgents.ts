@@ -19,11 +19,26 @@ export function useAgents() {
     if (msg.type !== "agent_status") return;
 
     const update = msg.payload as Partial<Agent> & { id: string };
-    setAgents((prev) =>
-      prev.map((agent) =>
-        agent.id === update.id ? { ...agent, ...update } : agent,
-      ),
-    );
+    setAgents((prev) => {
+      const exists = prev.some((a) => a.id === update.id);
+      if (exists) {
+        return prev.map((agent) =>
+          agent.id === update.id ? { ...agent, ...update } : agent,
+        );
+      }
+      // New agent — add with defaults
+      const newAgent: Agent = {
+        name: update.id,
+        provider: "other",
+        status: "idle",
+        current_task: null,
+        department_id: null,
+        sprite_number: 0,
+        updated_at: Date.now(),
+        ...update,
+      };
+      return [...prev, newAgent];
+    });
   }, []);
 
   return { agents, handleWsMessage };

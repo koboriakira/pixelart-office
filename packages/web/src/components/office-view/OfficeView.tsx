@@ -1,9 +1,17 @@
 import { useRef } from "react";
+import type { Agent, DepartmentWithAgents } from "../../types";
+import type { Theme } from "../../hooks/useTheme";
 import { useOfficePixiRuntime } from "../../hooks/useOfficePixiRuntime";
 
-export function OfficeView() {
+export interface OfficeViewProps {
+  agents: Agent[];
+  departments: DepartmentWithAgents[];
+  theme: Theme;
+}
+
+export function OfficeView({ agents, departments, theme }: OfficeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { ready } = useOfficePixiRuntime(containerRef);
+  const { ready } = useOfficePixiRuntime(containerRef, agents, departments, theme);
 
   return (
     <div

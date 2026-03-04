@@ -1,7 +1,9 @@
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useAgents } from "./hooks/useAgents";
+import { useDepartments } from "./hooks/useDepartments";
 import { useTheme } from "./hooks/useTheme";
 import { Header } from "./components/Header";
+import { OfficeView } from "./components/office-view/OfficeView";
 
 const themeStyles = {
   light: { background: "#f5f5f5", color: "#333" },
@@ -10,6 +12,7 @@ const themeStyles = {
 
 export default function App() {
   const { agents, handleWsMessage } = useAgents();
+  const { departments } = useDepartments();
   const wsStatus = useWebSocket(handleWsMessage);
   const { theme, toggleTheme } = useTheme();
   const style = themeStyles[theme];
@@ -23,10 +26,20 @@ export default function App() {
       }}
     >
       <Header agents={agents} theme={theme} onToggleTheme={toggleTheme} />
-      <main style={{ padding: 16 }}>
-        <p>WebSocket: {wsStatus}</p>
-        <p>Agents: {agents.length}</p>
-      </main>
+      {wsStatus === "disconnected" && (
+        <div
+          style={{
+            background: "#ff4444",
+            color: "white",
+            padding: "4px 16px",
+            fontSize: 12,
+            textAlign: "center",
+          }}
+        >
+          WebSocket disconnected — reconnecting...
+        </div>
+      )}
+      <OfficeView agents={agents} departments={departments} theme={theme} />
     </div>
   );
 }
