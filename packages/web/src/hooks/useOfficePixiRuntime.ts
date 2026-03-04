@@ -35,17 +35,20 @@ export function useOfficePixiRuntime(
 
     let cancelled = false;
 
+    const { width, height } = container.getBoundingClientRect();
+
     app
       .init({
         background: theme === "dark" ? 0x1a1a2e : 0xe8e8e8,
-        resizeTo: container,
+        width: width || 800,
+        height: height || 600,
         antialias: false,
         resolution: window.devicePixelRatio || 1,
         autoDensity: true,
       })
       .then(() => {
         if (cancelled) {
-          app.destroy(true);
+          try { app.destroy(true); } catch { /* StrictMode double-invoke */ }
           return;
         }
         container.appendChild(app.canvas as HTMLCanvasElement);
@@ -58,7 +61,7 @@ export function useOfficePixiRuntime(
       spritesRef.current.clear();
       sceneRef.current = null;
       if (appRef.current) {
-        appRef.current.destroy(true);
+        try { appRef.current.destroy(true); } catch { /* safe cleanup */ }
         appRef.current = null;
       }
     };
