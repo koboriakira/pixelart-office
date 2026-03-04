@@ -5,6 +5,7 @@ import http from "node:http";
 import { initDb } from "./db.js";
 import { agentsRoute } from "./routes/agents.js";
 import { departmentsRoute } from "./routes/departments.js";
+import { createEventsRoute } from "./routes/events.js";
 import { createHub } from "./ws/hub.js";
 
 initDb();
@@ -22,6 +23,7 @@ console.log(`Server running on http://localhost:${port}`);
 const server = serve({ fetch: app.fetch, port }) as unknown as http.Server;
 
 const hub = createHub(server);
-export { hub };
+app.route("/api/events", createEventsRoute((msg) => hub.broadcast(msg)));
 
+export { hub };
 export default app;
