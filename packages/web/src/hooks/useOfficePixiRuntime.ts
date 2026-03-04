@@ -83,20 +83,24 @@ export function useOfficePixiRuntime(
     // Merge agents into departments for display
     const deptsWithAgents = mergeDepartmentsAndAgents(departments, agents);
 
-    if (deptsWithAgents.length === 0) {
-      // No departments — show a default room with all agents
-      const defaultDept: DepartmentWithAgents = {
+    // Filter to departments that have agents (avoid empty rooms)
+    const populated = deptsWithAgents.filter((d) => d.agents.length > 0);
+
+    if (populated.length === 0 && agents.length > 0) {
+      // No departments at all — show a default room with all agents
+      populated.push({
         id: "dev",
         name: "Office",
         theme_color: "#4285f4",
         sort_order: 0,
         agents: agents.map((a) => ({ id: a.id, name: a.name, status: a.status })),
-      };
-      deptsWithAgents.push(defaultDept);
+      });
     }
 
+    const deptsToRender = populated;
+
     const canvasWidth = app.screen.width || 800;
-    const rooms = layoutRooms(deptsWithAgents, canvasWidth);
+    const rooms = layoutRooms(deptsToRender, canvasWidth);
 
     for (const room of rooms) {
       const roomContainer = drawDepartmentRoom(room, theme);
@@ -145,20 +149,37 @@ function mergeDepartmentsAndAgents(
 ): DepartmentWithAgents[] {
   if (departments.length === 0) return [];
 
-  return departments.map((dept) => {
+  const assignedIds = new Set<string>();
+
+  const result = departments.map((dept) => {
     // Find agents belonging to this department
     const deptAgents = agents
       .filter((a) => a.department_id === dept.id)
-      .map((a) => ({ id: a.id, name: a.name, status: a.status }));
+      .map((a) => {
+        assignedIds.add(a.id);
+        return { id: a.id, name: a.name, status: a.status };
+      });
 
     // Also include agents already listed in dept.agents but not in agents list
     const existingIds = new Set(deptAgents.map((a) => a.id));
     for (const a of dept.agents) {
       if (!existingIds.has(a.id)) {
+        assignedIds.add(a.id);
         deptAgents.push(a);
       }
     }
 
     return { ...dept, agents: deptAgents };
   });
+
+  // Unassigned agents go into the first department
+  const unassigned = agents.filter((a) => !assignedIds.has(a.id));
+  if (unassigned.length > 0 && result.length > 0) {
+    const first = result[0];
+    for (const a of unassigned) {
+      first.agents.push({ id: a.id, name: a.name, status: a.status });
+    }
+  }
+
+  return result;
 }
