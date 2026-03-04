@@ -1,55 +1,54 @@
 // Pixel Art Office — Claude Code Hook 設定
 //
-// この設定を ~/.claude/settings.json の "hooks" にマージしてください。
-// エージェントIDは claude-{リポジトリ名}-{エージェント名} の形式です。
-// サーバー (localhost:3100) が停止中でも --max-time 1 により即座にタイムアウトし、
-// Claude Code のセッションをブロックしません。
+// セットアップ: bash examples/install-hooks.sh
+//
+// ヘルパースクリプト (~/.local/bin/pixelart-office-hook.sh) を経由して
+// イベントを送信する方式。エスケープ不要でメンテナンスしやすい。
+//
+// エージェントID: claude-{リポジトリ名}-main
+// サーバー停止時: --max-time 1 で即タイムアウト、セッションに影響なし
 {
   "hooks": {
-    // セッション開始時に idle 状態を通知
     "SessionStart": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "REPO=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null || echo unknown)\"); curl -sf --max-time 1 -X POST http://localhost:3100/api/events -H 'Content-Type: application/json' -d \"{\\\"agent_id\\\":\\\"claude-${REPO}-main\\\",\\\"event\\\":\\\"session_start\\\",\\\"provider\\\":\\\"claude\\\"}\" >/dev/null 2>&1 || true"
+            "command": "~/.local/bin/pixelart-office-hook.sh session_start"
           }
         ]
       }
     ],
-    // ツール使用開始 → working 状態
     "PreToolUse": [
       {
         "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "REPO=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null || echo unknown)\"); curl -sf --max-time 1 -X POST http://localhost:3100/api/events -H 'Content-Type: application/json' -d \"{\\\"agent_id\\\":\\\"claude-${REPO}-main\\\",\\\"event\\\":\\\"tool_use_start\\\",\\\"provider\\\":\\\"claude\\\",\\\"tool\\\":\\\"$CLAUDE_TOOL_NAME\\\"}\" >/dev/null 2>&1 || true"
+            "command": "~/.local/bin/pixelart-office-hook.sh tool_use_start $CLAUDE_TOOL_NAME"
           }
         ]
       }
     ],
-    // ツール使用終了 → idle 状態
     "PostToolUse": [
       {
         "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "REPO=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null || echo unknown)\"); curl -sf --max-time 1 -X POST http://localhost:3100/api/events -H 'Content-Type: application/json' -d \"{\\\"agent_id\\\":\\\"claude-${REPO}-main\\\",\\\"event\\\":\\\"tool_use_end\\\",\\\"provider\\\":\\\"claude\\\"}\" >/dev/null 2>&1 || true"
+            "command": "~/.local/bin/pixelart-office-hook.sh tool_use_end"
           }
         ]
       }
     ],
-    // セッション終了 → offline 状態
     "Stop": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "REPO=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null || echo unknown)\"); curl -sf --max-time 1 -X POST http://localhost:3100/api/events -H 'Content-Type: application/json' -d \"{\\\"agent_id\\\":\\\"claude-${REPO}-main\\\",\\\"event\\\":\\\"session_stop\\\",\\\"provider\\\":\\\"claude\\\"}\" >/dev/null 2>&1 || true"
+            "command": "~/.local/bin/pixelart-office-hook.sh session_stop"
           }
         ]
       }
