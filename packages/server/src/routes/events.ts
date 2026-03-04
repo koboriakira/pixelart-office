@@ -35,7 +35,7 @@ export function createEventsRoute(
     const agent = {
       id: body.agent_id,
       name: existing?.name ?? body.agent_id,
-      provider: existing?.provider ?? "other",
+      provider: body.provider ?? existing?.provider ?? "other",
       status: newStatus ?? existing?.status ?? "idle",
       current_task: body.task ?? existing?.current_task ?? null,
       department_id: existing?.department_id ?? null,

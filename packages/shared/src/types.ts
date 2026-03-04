@@ -20,6 +20,7 @@ export type EventType = (typeof EVENT_TYPES)[number];
 export interface EventPayload {
   agent_id: string;
   event: EventType;
+  provider?: Provider;
   tool?: string;
   task?: string;
   metadata?: Record<string, unknown>;

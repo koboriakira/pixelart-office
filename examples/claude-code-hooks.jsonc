@@ -1,0 +1,58 @@
+// Pixel Art Office — Claude Code Hook 設定
+//
+// この設定を ~/.claude/settings.json の "hooks" にマージしてください。
+// エージェントIDは claude-{リポジトリ名}-{エージェント名} の形式です。
+// サーバー (localhost:3100) が停止中でも --max-time 1 により即座にタイムアウトし、
+// Claude Code のセッションをブロックしません。
+{
+  "hooks": {
+    // セッション開始時に idle 状態を通知
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "REPO=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null || echo unknown)\"); curl -sf --max-time 1 -X POST http://localhost:3100/api/events -H 'Content-Type: application/json' -d \"{\\\"agent_id\\\":\\\"claude-${REPO}-main\\\",\\\"event\\\":\\\"session_start\\\",\\\"provider\\\":\\\"claude\\\"}\" >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ],
+    // ツール使用開始 → working 状態
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "REPO=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null || echo unknown)\"); curl -sf --max-time 1 -X POST http://localhost:3100/api/events -H 'Content-Type: application/json' -d \"{\\\"agent_id\\\":\\\"claude-${REPO}-main\\\",\\\"event\\\":\\\"tool_use_start\\\",\\\"provider\\\":\\\"claude\\\",\\\"tool\\\":\\\"$CLAUDE_TOOL_NAME\\\"}\" >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ],
+    // ツール使用終了 → idle 状態
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "REPO=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null || echo unknown)\"); curl -sf --max-time 1 -X POST http://localhost:3100/api/events -H 'Content-Type: application/json' -d \"{\\\"agent_id\\\":\\\"claude-${REPO}-main\\\",\\\"event\\\":\\\"tool_use_end\\\",\\\"provider\\\":\\\"claude\\\"}\" >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ],
+    // セッション終了 → offline 状態
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "REPO=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null || echo unknown)\"); curl -sf --max-time 1 -X POST http://localhost:3100/api/events -H 'Content-Type: application/json' -d \"{\\\"agent_id\\\":\\\"claude-${REPO}-main\\\",\\\"event\\\":\\\"session_stop\\\",\\\"provider\\\":\\\"claude\\\"}\" >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ]
+  }
+}
